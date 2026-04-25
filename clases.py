@@ -128,3 +128,34 @@ class AnalizadorSIATA:
         plt.savefig(archivo, dpi=150, bbox_inches='tight')
         print(f"[SIATA] Grafico guardado: '{archivo}'")
         plt.show()
+
+    def operaciones(self, col1, col2, operacion='sumar'):
+        """Tres operaciones: apply (norm. min-max), map (categoria), suma/resta."""
+        sep = "-" * 55
+        print(f"\n{sep}\n OPERACIONES | objeto '{self._id}' | {self._nombre}\n{sep}")
+
+        mn, mx = self._df[col1].min(), self._df[col1].max()
+        normalizada = self._df[col1].apply(
+            lambda x: (x - mn) / (mx - mn) if pd.notna(x) else float('nan')
+        )
+        print(f"\n1. apply - Normalizacion min-max de '{col1}' (5 primeras filas):")
+        print(normalizada.head().to_string())
+
+        mediana = self._df[col1].median()
+        categorizada = self._df[col1].map(
+            lambda x: 'ALTO' if pd.notna(x) and x >= mediana else ('BAJO' if pd.notna(x) else None)
+        )
+        print(f"\n2. map - Categorizacion de '{col1}' (mediana={mediana:.3f}) (5 primeras):")
+        print(categorizada.head().to_string())
+        print(f"   Conteo: {categorizada.value_counts().to_dict()}")
+
+        if operacion == 'sumar':
+            resultado = self._df[col1] + self._df[col2]
+            etiqueta  = f"{col1} + {col2}"
+        else:
+            resultado = self._df[col1] - self._df[col2]
+            etiqueta  = f"{col1} - {col2}"
+        print(f"\n3. {operacion.capitalize()} - {etiqueta} (5 primeras filas):")
+        print(resultado.head().to_string())
+
+        return normalizada, categorizada, resultado
