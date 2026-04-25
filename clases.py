@@ -69,3 +69,28 @@ def _ruta_grafica(tipo, nombre_id, descripcion):
     """Construye la ruta de guardado: graficas/{tipo}_{id}_{descripcion}.png"""
     nombre_archivo = f"{tipo}_{nombre_id}_{descripcion}.png"
     return os.path.join(CARPETA_GRAFICAS, nombre_archivo)
+
+
+# ====================================================================
+#  CLASE AnalizadorSIATA
+# ====================================================================
+
+class AnalizadorSIATA:
+    """Analiza archivos CSV de calidad del aire del sistema SIATA."""
+
+    def __init__(self, ruta, nombre_id="siata"):
+        self._ruta     = ruta
+        self._nombre   = os.path.basename(ruta)
+        self._id       = nombre_id
+        self._df       = pd.read_csv(ruta, parse_dates=['fecha_hora'])
+        self._df.set_index('fecha_hora', inplace=True)
+        print(f"\n[SIATA] '{self._nombre}' cargado como objeto '{self._id}'.")
+        print(f"  Registros: {len(self._df)}  |  Columnas: {list(self._df.columns)}")
+
+    def mostrar_info(self):
+        """Muestra info() y describe() del DataFrame."""
+        sep = "-" * 55
+        print(f"\n{sep}\n INFO - objeto '{self._id}' | archivo: {self._nombre}\n{sep}")
+        self._df.info()
+        print(f"\n{sep}\n ESTADISTICAS DESCRIPTIVAS\n{sep}")
+        print(self._df.describe())
