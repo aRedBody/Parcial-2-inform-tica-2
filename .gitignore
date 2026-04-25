@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Entornos virtuales
+venv/
+env/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Graficas generadas (se recrean al ejecutar)
+graficas/
+
+# IDE
+.vscode/
+.idea/
+
+# Sistema
+.DS_Store
+Thumbs.db
