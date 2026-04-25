@@ -200,3 +200,31 @@ class AnalizadorSIATA:
     def columnas_numericas(self):
         """Devuelve lista de columnas numericas del DataFrame."""
         return list(self._df.select_dtypes(include='number').columns)
+
+
+# ====================================================================
+#  CLASE AnalizadorEEG
+# ====================================================================
+
+class AnalizadorEEG:
+    """Analiza archivos MAT de EEG (Parkinson / control) a 1 kHz."""
+
+    FS = 1000  # Hz
+
+    def __init__(self, ruta, nombre_id="eeg"):
+        self._ruta    = ruta
+        self._nombre  = os.path.basename(ruta)
+        self._id      = nombre_id
+        self._mat     = sio.loadmat(ruta)
+        self._data3d  = self._mat['data']          # (canales, muestras, epocas)
+        self._data2d  = np.mean(self._data3d, axis=2)  # promedio epocas -> (canales, muestras)
+        print(f"\n[EEG] '{self._nombre}' cargado como objeto '{self._id}'.")
+        print(f"  Forma 3D: {self._data3d.shape}  (canales x muestras x epocas)")
+        print(f"  Forma 2D (promedio epocas): {self._data2d.shape}")
+
+    def mostrar_llaves(self):
+        """Muestra las variables del archivo .mat usando whosmat."""
+        sep = "-" * 55
+        print(f"\n{sep}\n WHOSMAT | objeto '{self._id}' | {self._nombre}\n{sep}")
+        for nombre, forma, tipo in sio.whosmat(self._ruta):
+            print(f"  Variable: '{nombre}'  |  Forma: {forma}  |  Tipo: {tipo}")
