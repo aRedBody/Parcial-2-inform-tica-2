@@ -94,3 +94,37 @@ class AnalizadorSIATA:
         self._df.info()
         print(f"\n{sep}\n ESTADISTICAS DESCRIPTIVAS\n{sep}")
         print(self._df.describe())
+
+    def graficar_columna(self, columna):
+        """Plot temporal, boxplot e histograma en 3 subplots."""
+        datos = self._df[columna].dropna()
+
+        fig, axes = plt.subplots(1, 3, figsize=(16, 5))
+        fig.suptitle(
+            f"SIATA | Objeto: '{self._id}' | Columna: '{columna}' | Archivo: {self._nombre}",
+            fontsize=11
+        )
+
+        axes[0].plot(self._df.index, self._df[columna], lw=0.8, color='steelblue')
+        axes[0].set_title("Serie temporal")
+        axes[0].set_xlabel("Fecha")
+        axes[0].set_ylabel(columna)
+        axes[0].tick_params(axis='x', rotation=30)
+        axes[0].grid(alpha=0.3)
+
+        axes[1].boxplot(datos, patch_artist=True,
+                        boxprops=dict(facecolor='lightcoral', alpha=0.75))
+        axes[1].set_title("Boxplot")
+        axes[1].set_xlabel(columna)
+        axes[1].set_ylabel("Valor")
+
+        axes[2].hist(datos, bins=30, color='seagreen', edgecolor='white', alpha=0.85)
+        axes[2].set_title("Histograma")
+        axes[2].set_xlabel(columna)
+        axes[2].set_ylabel("Frecuencia")
+
+        plt.tight_layout()
+        archivo = _ruta_grafica("SIATA", self._id, f"graficos_{columna}")
+        plt.savefig(archivo, dpi=150, bbox_inches='tight')
+        print(f"[SIATA] Grafico guardado: '{archivo}'")
+        plt.show()
