@@ -313,3 +313,34 @@ class AnalizadorEEG:
     @property
     def n_muestras(self):
         return self._data3d.shape[1]
+
+
+# ====================================================================
+#  CLASE AlmacenObjetos  (puntos extra)
+# ====================================================================
+
+class AlmacenObjetos:
+    """Almacena objetos SIATA/EEG con nombre para busqueda posterior."""
+
+    def __init__(self):
+        self._registro = {}
+
+    def agregar(self, nombre, objeto):
+        self._registro[nombre] = objeto
+        print(f"  [Almacen] '{nombre}' guardado ({type(objeto).__name__}).")
+
+    def buscar(self, nombre):
+        obj = self._registro.get(nombre)
+        if obj is None:
+            print(f"  [Almacen] No existe ningun objeto con nombre '{nombre}'.")
+        return obj
+
+    def listar(self):
+        if not self._registro:
+            print("  [Almacen] No hay objetos guardados.")
+            return
+        sep = "-" * 55
+        print(f"\n{sep}\n OBJETOS EN EL ALMACEN\n{sep}")
+        for nom, obj in self._registro.items():
+            print(f"  * Nombre: '{nom}'  |  Tipo: {type(obj).__name__}  "
+                  f"|  Archivo: {getattr(obj, '_nombre', '?')}")
