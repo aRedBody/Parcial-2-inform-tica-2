@@ -159,3 +159,44 @@ class AnalizadorSIATA:
         print(resultado.head().to_string())
 
         return normalizada, categorizada, resultado
+
+    def graficar_remuestreado(self, columna):
+        """Grafica la columna remuestreada a dias, meses y trimestres."""
+        try:
+            d = self._df[columna].resample('D').mean()
+            m = self._df[columna].resample('ME').mean()
+            q = self._df[columna].resample('QE').mean()
+        except ValueError:
+            d = self._df[columna].resample('D').mean()
+            m = self._df[columna].resample('M').mean()
+            q = self._df[columna].resample('Q').mean()
+
+        fig, axes = plt.subplots(3, 1, figsize=(14, 10))
+        fig.suptitle(
+            f"SIATA | Objeto: '{self._id}' | Remuestreo: '{columna}' | Archivo: {self._nombre}",
+            fontsize=11
+        )
+        specs = [
+            (d, 'Diario',     'royalblue'),
+            (m, 'Mensual',    'darkorange'),
+            (q, 'Trimestral', 'forestgreen'),
+        ]
+        for ax, (serie, titulo, color) in zip(axes, specs):
+            ax.plot(serie.index, serie.values, marker='o', ms=3,
+                    lw=1.2, color=color, label=titulo)
+            ax.set_title(titulo)
+            ax.set_xlabel("Fecha")
+            ax.set_ylabel(f"{columna} (promedio)")
+            ax.legend()
+            ax.grid(alpha=0.3)
+            ax.tick_params(axis='x', rotation=30)
+
+        plt.tight_layout()
+        archivo = _ruta_grafica("SIATA", self._id, f"resample_{columna}")
+        plt.savefig(archivo, dpi=150, bbox_inches='tight')
+        print(f"[SIATA] Grafico de remuestreo guardado: '{archivo}'")
+        plt.show()
+
+    def columnas_numericas(self):
+        """Devuelve lista de columnas numericas del DataFrame."""
+        return list(self._df.select_dtypes(include='number').columns)
