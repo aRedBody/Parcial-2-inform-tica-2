@@ -266,3 +266,50 @@ class AnalizadorEEG:
         print(f"[EEG] Grafico guardado: '{archivo}'")
         plt.show()
         return suma
+
+    def estadisticas_3d(self, eje):
+        """Promedio y std de la matriz 3D con stem en 2 subplots."""
+        prom = np.mean(self._data3d, axis=eje).flatten()
+        std  = np.std(self._data3d,  axis=eje).flatten()
+
+        MAX_PTS = 300
+        if len(prom) > MAX_PTS:
+            paso = len(prom) // MAX_PTS
+            prom = prom[::paso]
+            std  = std[::paso]
+            print(f"  [EEG] Mostrando {len(prom)} puntos (1 de cada {paso}).")
+
+        idx = np.arange(len(prom))
+
+        fig, axes = plt.subplots(2, 1, figsize=(14, 8))
+        fig.suptitle(
+            f"EEG | Objeto: '{self._id}' | Estadisticas 3D - eje {eje} | "
+            f"Archivo: {self._nombre}",
+            fontsize=10
+        )
+
+        axes[0].stem(idx, prom, linefmt='C0-', markerfmt='C0o', basefmt='k-')
+        axes[0].set_title(f"Promedio a lo largo del eje {eje}")
+        axes[0].set_xlabel("Indice")
+        axes[0].set_ylabel("Amplitud media (uV)")
+        axes[0].grid(alpha=0.3)
+
+        axes[1].stem(idx, std, linefmt='C1-', markerfmt='C1o', basefmt='k-')
+        axes[1].set_title(f"Desviacion estandar a lo largo del eje {eje}")
+        axes[1].set_xlabel("Indice")
+        axes[1].set_ylabel("Desv. estandar (uV)")
+        axes[1].grid(alpha=0.3)
+
+        plt.tight_layout()
+        archivo = _ruta_grafica("EEG", self._id, f"estadisticas_eje{eje}")
+        plt.savefig(archivo, dpi=150, bbox_inches='tight')
+        print(f"[EEG] Grafico estadisticas guardado: '{archivo}'")
+        plt.show()
+
+    @property
+    def n_canales(self):
+        return self._data3d.shape[0]
+
+    @property
+    def n_muestras(self):
+        return self._data3d.shape[1]
