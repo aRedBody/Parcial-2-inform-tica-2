@@ -228,3 +228,41 @@ class AnalizadorEEG:
         print(f"\n{sep}\n WHOSMAT | objeto '{self._id}' | {self._nombre}\n{sep}")
         for nombre, forma, tipo in sio.whosmat(self._ruta):
             print(f"  Variable: '{nombre}'  |  Forma: {forma}  |  Tipo: {tipo}")
+
+    def sumar_canales(self, canales, min_m, max_m):
+        """Suma 3 canales en el rango dado y grafica en 2 subplots."""
+        t    = np.arange(min_m, max_m) / self.FS
+        suma = np.sum([self._data2d[ch, min_m:max_m] for ch in canales], axis=0)
+        nombres_canales = [c + 1 for c in canales]
+
+        fig, axes = plt.subplots(2, 1, figsize=(14, 8))
+        fig.suptitle(
+            f"EEG | Objeto: '{self._id}' | Suma canales {nombres_canales} | "
+            f"Muestras [{min_m}-{max_m}] | Archivo: {self._nombre}",
+            fontsize=10
+        )
+
+        for ch in canales:
+            axes[0].plot(t, self._data2d[ch, min_m:max_m],
+                         label=f"Canal {ch + 1}", lw=0.9)
+        axes[0].set_title(f"Canales seleccionados: {nombres_canales}")
+        axes[0].set_xlabel("Tiempo (s)")
+        axes[0].set_ylabel("Amplitud (uV)")
+        axes[0].legend()
+        axes[0].grid(alpha=0.3)
+
+        axes[1].plot(t, suma, color='crimson', lw=1.0,
+                     label=f"Suma canales {nombres_canales}")
+        axes[1].set_title(f"Resultado: suma de canales {nombres_canales}")
+        axes[1].set_xlabel("Tiempo (s)")
+        axes[1].set_ylabel("Amplitud (uV)")
+        axes[1].legend()
+        axes[1].grid(alpha=0.3)
+
+        plt.tight_layout()
+        desc    = f"suma_canales_{{'_'.join(str(c) for c in nombres_canales)}}_m{min_m}a{max_m}"
+        archivo = _ruta_grafica("EEG", self._id, desc)
+        plt.savefig(archivo, dpi=150, bbox_inches='tight')
+        print(f"[EEG] Grafico guardado: '{archivo}'")
+        plt.show()
+        return suma
